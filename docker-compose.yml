@@ -1,0 +1,39 @@
+version: '3.4'
+
+services: 
+  echo:
+    image: ealen/echo-server:0.7.0
+    ports:
+      - 3000:80
+  app1:
+    container_name: app1
+    build:
+      context: ./simple-app
+      target: app1
+    ports:
+      - 8080:8080
+  app2:
+    container_name: app2
+    build:
+      context: ./simple-app
+      target: app2
+    ports:
+      - 8081:8080
+  haproxy:
+    image: haproxy:2.3
+    depends_on:
+      - app1
+      - app2
+    ports:
+      - 80:80
+    volumes:
+      - "./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro"
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - app1
+      - app2
+    ports:
+      - "81:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
